@@ -92,11 +92,6 @@ COPY start-singleuser.sh /usr/local/bin/
 COPY jupyter_notebook_config.py /home/$NB_USER/.jupyter/
 RUN chown -R $NB_USER:users /home/$NB_USER/.jupyter
 
-# Switch back to jovyan to avoid accidental container runs as root
-USER $NB_USER
-
-USER root
-
 # Install all OS dependencies for fully functional notebook server
 RUN apt-get update && apt-get install -yq --no-install-recommends \
     git \
@@ -118,20 +113,20 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Switch back to jovyan to avoid accidental container runs as root
-USER $NB_USER
 
-USER root
+############# This is the only code needed when base-notebook will be based on debian stretch 
 
 # libav-tools for matplotlib anim
 RUN apt-get update && \
     apt-get install -y --no-install-recommends libav-tools \
-    git && \
+    apt-utils \
+    xterm && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install all geospatial packages
-RUN apt-get install -y --no-install-recommends grass \
+# Install all geospatial packages for python 2
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends grass \
     grass-dev \
     python-gdal \
     python-rasterio \
@@ -150,8 +145,9 @@ RUN apt-get install -y --no-install-recommends grass \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-
-RUN apt-get install -y --no-install-recommends python3-fiona \
+# Install all geospatial packages python 3
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3-fiona \
     python3-gdal \
     python3-rasterio \
     python3-shapely \
@@ -162,11 +158,27 @@ RUN apt-get install -y --no-install-recommends python3-fiona \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+
 # copy GRASS startup to binaries directory
 COPY start-grass.sh /usr/local/bin/
 
+ENV TERM xterm
+
 USER $NB_USER    
-    
+
+RUN conda create --quiet --yes -p $CONDA_DIR/envs/python2 python=2.7 \
+    psutil \
+    cartopy \
+    folium \
+    iris
+
+RUN conda install --quiet --yes \
+    psutil \
+    cartopy \
+    folium \
+    iris \
+    pysal
+
 # Add shortcuts to distinguish pip for python2 and python3 envs
 RUN ln -s $CONDA_DIR/envs/python2/bin/pip $CONDA_DIR/bin/pip2 && \
     ln -s $CONDA_DIR/bin/pip $CONDA_DIR/bin/pip3
@@ -175,21 +187,15 @@ RUN ln -s $CONDA_DIR/envs/python2/bin/pip $CONDA_DIR/bin/pip2 && \
 RUN mkdir -p $HOME/.ipython/profile_default/startup
 COPY mplimporthook.py $HOME/.ipython/profile_default/startup/
 
-USER root
-
-# Install Python 2 kernel spec globally to avoid permission problems when NB_UID
-# switching at runtime.
-RUN $CONDA_DIR/envs/python2/bin/python -m ipykernel install
-
-USER $NB_USER
-
 # download and move to work directory OSGeoLive-Notebooks
-WORKDIR /tmp
-
-git clone https://github.com/OSGeo/OSGeoLive-Notebooks.git
+RUN git clone https://github.com/OSGeo/OSGeoLive-Notebooks.git
 
 RUN mv OSGeoLive-Notebooks/* /home/$NB_USER/work/
 RUN rm -rf OSGeoLive-Notebooks/
+
+RUN git clone https://github.com/wenzeslaus/python-grass-addon.git
+RUN git clone https://github.com/zarch/workshop-pygrass.git
+
 
 # create directories and download North Carolina dataset
 WORKDIR /home/$NB_USER/
@@ -198,3 +204,8 @@ WORKDIR /home/$NB_USER/grassdata
 RUN wget -c https://grass.osgeo.org/sampledata/north_carolina/nc_spm_08_grass7.tar.gz
 RUN tar xzf nc_spm_08_grass7.tar.gz
 RUN rm -f nc_spm_08_grass7.tar.gz
+
+WORKDIR /home/$NB_USER/work
+
+# Switch back to jovyan to avoid accidental container runs as root
+USER $NB_USER
