@@ -126,8 +126,7 @@ RUN apt-get update && \
 
 # Install all geospatial packages for python 2
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends grass \
-    grass-dev \
+    apt-get install -y --no-install-recommends \
     python-gdal \
     python-rasterio \
     python-shapely \
@@ -144,6 +143,45 @@ RUN apt-get update && \
     python-owslib && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Install GRASS trunk, when grass 72 will be available we can switch to it
+
+# RUN apt-get update && \
+#    apt-get install -y --no-install-recommends grass \
+#    grass-dev 
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends subversion \
+    build-essential \
+    flex \
+    bison \
+    libncurses5-dev \
+    zlib1g-dev \
+    libjpeg-dev \
+    libgdal-dev \
+    libtiff-dev \
+    libgcc1 \
+    gettext \
+    libfreetype6-dev \
+    libreadline-dev \
+    libxmu-dev \
+    make \
+    python-dev \
+    swig \
+    sqlite3 \
+    fftw3-dev \
+    libsqlite3-dev \
+    mesa-common-dev \
+    libglu1-mesa-dev \
+    libcairo2-dev \
+    netcdf-bin \
+    proj-bin \
+    gdal-bin \
+    tcl-dev tk-dev libavcodec-dev python-wxversion libavutil-dev
+
+COPY grass-compile.sh /usr/local/bin/
+
+RUN grass-compile.sh
 
 # Install all geospatial packages python 3
 RUN apt-get update && \
