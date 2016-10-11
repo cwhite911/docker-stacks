@@ -134,6 +134,7 @@ RUN apt-get update && \
     python-shapely \
     python-fiona \
     python-geopandas \
+    python-matplotlib \
     python-mapnik \
     python-pdal \
     python-pyproj \
@@ -220,25 +221,25 @@ COPY update-notebook.sh /usr/local/bin/
 
 ENV TERM xterm
 
-USER $NB_USER    
-
-RUN conda create --quiet --yes -p $CONDA_DIR/envs/python2 python=2.7 \
-    psutil \
-    cartopy \
-    folium \
-    iris \
-    pysal
-
-RUN conda install --quiet --yes \
-    psutil \
-    cartopy \
-    folium \
-    iris \
-    pysal
-
 # Add shortcuts to distinguish pip for python2 and python3 envs
 RUN ln -s $CONDA_DIR/envs/python2/bin/pip $CONDA_DIR/bin/pip2 && \
     ln -s $CONDA_DIR/bin/pip $CONDA_DIR/bin/pip3
+
+RUN pip2 install \
+    psutil \
+    cartopy \
+    folium \
+    iris \
+    pysal
+
+RUN pip3 install \
+    psutil \
+    cartopy \
+    folium \
+    iris \
+    pysal
+
+USER $NB_USER    
 
 # Configure ipython kernel to use matplotlib inline backend by default
 RUN mkdir -p $HOME/.ipython/profile_default/startup
@@ -259,6 +260,22 @@ WORKDIR /home/$NB_USER/grassdata
 RUN wget -c https://grass.osgeo.org/sampledata/north_carolina/nc_spm_08_grass7.tar.gz
 RUN tar xzf nc_spm_08_grass7.tar.gz
 RUN rm -f nc_spm_08_grass7.tar.gz
+
+USER root
+
+RUN mkdir -p /usr/local/share/data/north_carolina
+
+WORKDIR /usr/local/share/data/north_carolina
+
+RUN wget -c http://grass.osgeo.org/sampledata/north_carolina/nc_shape.tar.gz
+RUN tar xzf nc_shape.tar.gz
+RUN mv ncshape shape
+
+RUN wget -c http://grass.osgeo.org/sampledata/north_carolina/nc_rast_geotiff.tar.gz
+RUN tar xzf nc_rast_geotiff.tar.gz
+RUN mv ncrast raster
+
+RUN chmod -R 777 /usr/local/share/data/north_carolina
 
 WORKDIR /home/$NB_USER/work
 
