@@ -1,3 +1,10 @@
+#!/bin/bash
+
+virtualenv --system-site-packages --python=/usr/bin/python2 ~/venv2
+source ~/venv2/bin/activate
+
+cd ~/venv2
+
 svn co https://svn.osgeo.org/grass/grass/trunk/ grass_trunk
 
 cd grass_trunk
@@ -7,7 +14,7 @@ cd grass_trunk
     --with-sqlite \
     --with-cairo \
     --with-gdal=/usr/bin/gdal-config \
-    --with-python=/usr/bin/python-config \
+    --with-python=/usr/bin/python2-config \
     --with-cxx \
     --with-freetype=yes \
     --enable-largefile=yes \
@@ -21,3 +28,9 @@ cd grass_trunk
     --with-pthread \
     
 make -j$(nproc) && sudo make install && sudo ldconfig
+
+rm -rf grass_trunk
+
+source deactivate
+
+chown -R $NB_USER ~/venv2
