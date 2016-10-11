@@ -127,6 +127,8 @@ RUN apt-get update && \
 # Install all geospatial packages for python 2
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+    python-pip \
+    python-setuptools \
     python-gdal \
     python-rasterio \
     python-shapely \
@@ -144,11 +146,30 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install GRASS trunk, when grass 72 will be available we can switch to it
+# Install all geospatial packages python 3
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3-fiona \
+    python3-gdal \
+    python3-rasterio \
+    python3-shapely \
+    python3-pdal \
+    python3-osmapi \
+    python3-overpass \
+    python3-overpy && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# RUN apt-get update && \
+RUN python2 -m pip install ipykernel
+RUN python2 -m ipykernel install
+
+### Install GRASS trunk, when grass 72 will be available we can switch to it ###
+
+#RUN apt-get update && \
 #    apt-get install -y --no-install-recommends grass \
-#    grass-dev 
+#    grass-dev && \
+#    apt-get clean && \
+#    rm -rf /var/lib/apt/lists/*
+
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends subversion \
@@ -177,28 +198,25 @@ RUN apt-get update && \
     netcdf-bin \
     proj-bin \
     gdal-bin \
-    tcl-dev tk-dev libavcodec-dev python-wxversion libavutil-dev
-
+    tcl-dev tk-dev libavcodec-dev python-wxversion libavutil-dev \
+    virtualenv \
+    python3-virtualenv \
+    python-virtualenv && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+    
 COPY grass-compile.sh /usr/local/bin/
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    python-numpy \
+    python3-numpy
 
 RUN grass-compile.sh
 
-# Install all geospatial packages python 3
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3-fiona \
-    python3-gdal \
-    python3-rasterio \
-    python3-shapely \
-    python3-pdal \
-    python3-osmapi \
-    python3-overpass \
-    python3-overpy && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-
 # copy GRASS startup to binaries directory
 COPY start-grass.sh /usr/local/bin/
+COPY update-notebook.sh /usr/local/bin/
 
 ENV TERM xterm
 
@@ -208,7 +226,8 @@ RUN conda create --quiet --yes -p $CONDA_DIR/envs/python2 python=2.7 \
     psutil \
     cartopy \
     folium \
-    iris
+    iris \
+    pysal
 
 RUN conda install --quiet --yes \
     psutil \
@@ -226,14 +245,12 @@ RUN mkdir -p $HOME/.ipython/profile_default/startup
 COPY mplimporthook.py $HOME/.ipython/profile_default/startup/
 
 # download and move to work directory OSGeoLive-Notebooks
-RUN git clone https://github.com/OSGeo/OSGeoLive-Notebooks.git
+RUN git clone https://github.com/OSGeo/OSGeoLive-Notebooks.git /home/$NB_USER/work/
 
-RUN mv OSGeoLive-Notebooks/* /home/$NB_USER/work/
-RUN rm -rf OSGeoLive-Notebooks/
+WORKDIR /home/$NB_USER/work/
 
 RUN git clone https://github.com/wenzeslaus/python-grass-addon.git
 RUN git clone https://github.com/zarch/workshop-pygrass.git
-
 
 # create directories and download North Carolina dataset
 WORKDIR /home/$NB_USER/
