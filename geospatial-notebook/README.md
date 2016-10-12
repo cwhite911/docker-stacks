@@ -105,6 +105,7 @@ conda install -n python3 some-package
 ## Alternative Commands
 
 ### start-grass.sh
+
 You need to use the `start-grass.sh` script when you want to use the GRASS python libraries. 
 This script starts GRASS GIS and from it is running jupyter notebook. You have to run docker like this:
 
@@ -135,6 +136,14 @@ docker run -it --rm jupyter/geospatial-notebook start.sh ipython
 ```
 
 This script is particularly useful when you derive a new Dockerfile from this image and install additional Jupyter applications with subcommands like `jupyter console`, `jupyter kernelgateway`, and `jupyter lab`.
+
+### update-notebook.sh
+
+This script is useful to update the Jupyter notebooks from different repositories.
+
+```
+docker run jupyter/geospatial-notebook update-notebook.sh
+```
 
 ### Others
 
