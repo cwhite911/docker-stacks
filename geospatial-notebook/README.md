@@ -6,12 +6,25 @@
 
 * Jupyter Notebook 4.2.x
 * Conda Python 3.x and Python 2.7.x environments
-* matplotlib, GDAL, GRASS GIS, fiona, saterio, shapely, mapnik, pyproj, owslib, geopandas
+* matplotlib, GDAL, GRASS GIS, fiona, rasterio, shapely, mapnik, pyproj, owslib, geopandas
 * Unprivileged user `jovyan` (uid=1000, configurable, see options) in group `users` (gid=100) with ownership over `/home/jovyan` and `/opt/conda`
 * [tini](https://github.com/krallin/tini) as the container entrypoint and [start-notebook.sh](../base-notebook/start-notebook.sh) as the default command
+* A [start-grass.sh](./start-grass.sh) script useful to run Jupyter inside a GRASS GIS session.
 * A [start-singleuser.sh](../base-notebook/start-singleuser.sh) script useful for running a single-user instance of the Notebook server, as required by JupyterHub
 * A [start.sh](../base-notebook/start.sh) script useful for running alternative commands in the container (e.g. `ipython`, `jupyter kernelgateway`, `jupyter lab`)
 * Options for HTTPS, password auth, and passwordless `sudo`
+
+## Build from source
+
+To build the image you have first to [download the source code](https://github.com/lucadelu/docker-stacks/archive/geospatial.zip) and extract it, enter in the folder
+and as root user run
+
+```
+docker build -t jupyter:geospatial .
+```
+
+It will take some time to run the instructions and download the software and data, you need at least 8 GB of free space
+(this amout of space is required to store all the needed libraries and data)
 
 ## Basic Use
 
