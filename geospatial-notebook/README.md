@@ -16,8 +16,7 @@
 
 ## Build from source
 
-To build the image you have first to [download the source code](https://github.com/lucadelu/docker-stacks/archive/geospatial.zip) and extract it, enter in the folder
-and as root user run
+To build the image you have first to [download the source code](https://github.com/lucadelu/docker-stacks/archive/geospatial.zip) and extract it, enter in the geospatial-notebook folder and as root user run
 
 ```
 docker build -t jupyter/geospatial-notebook .
@@ -139,10 +138,10 @@ This script is particularly useful when you derive a new Dockerfile from this im
 
 ### update-notebook.sh
 
-This script is useful to update the Jupyter notebooks from different repositories.
+This script is useful to update the Jupyter notebooks from different repositories. Start a new terminal in your Jupyter instance and run
 
 ```
-docker run jupyter/geospatial-notebook update-notebook.sh
+update-notebook.sh
 ```
 
 ### Others
