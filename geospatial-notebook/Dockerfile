@@ -246,7 +246,7 @@ RUN mkdir -p $HOME/.ipython/profile_default/startup
 COPY mplimporthook.py $HOME/.ipython/profile_default/startup/
 
 # download and move to work directory OSGeoLive-Notebooks
-RUN git clone https://github.com/OSGeo/OSGeoLive-Notebooks.git /home/$NB_USER/work/
+RUN git clone https://github.com/lucadelu/OSGeoLive-Notebooks.git /home/$NB_USER/work/
 
 WORKDIR /home/$NB_USER/work/
 
